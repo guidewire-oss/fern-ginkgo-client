@@ -19,7 +19,7 @@ Welcome to the Fern Project, an innovative open-source solution designed to enha
    
    Import the fern client package
    ```go
-   import fern "github.com/guidewire/fern-ginkgo-client/client"
+   import fern "github.com/guidewire/fern-ginkgo-client/pkg/client"
    ```
 
    ```go
