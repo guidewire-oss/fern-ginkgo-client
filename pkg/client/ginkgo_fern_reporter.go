@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/guidewire/fern-reporter/pkg/models"
+	"client/pkg/models"
 
 	gt "github.com/onsi/ginkgo/v2/types"
 )
