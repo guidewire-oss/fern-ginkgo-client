@@ -1,8 +1,3 @@
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/Guidewire/fern-reporter/badge)](https://securityscorecards.dev/viewer/?uri=github.com/Guidewire/fern-ginkgo-client)
-![Coverage](https://img.shields.io/badge/Coverage-23.0%25-red)
-
-
-
 
 ## Introduction
 
