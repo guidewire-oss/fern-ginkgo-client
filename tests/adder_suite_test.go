@@ -9,5 +9,5 @@ import (
 
 func TestAdder(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Adder Suite")
+	RunSpecs(t, "Adder Suite", Label("this-is-a-suite-level-label"))
 }
