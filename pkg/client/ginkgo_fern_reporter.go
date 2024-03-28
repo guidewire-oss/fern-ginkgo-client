@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/guidewire/fern-ginkgo-client/pkg/models"
+	"client/pkg/models"
 
 	gt "github.com/onsi/ginkgo/v2/types"
 )
@@ -32,9 +32,10 @@ func (f *FernApiClient) Report(testName string, report gt.Report) error {
 			EndTime:         spec.EndTime,
 		}
 
-		// Assuming there is logic to convert spec.Tags to []Tag
-		specRun.Tags = convertTags(spec.Labels())
-
+		// Accessing the suite labels
+		labels := report.SuiteLabels
+		// logic to convert suite labels string to []Tag
+		specRun.Tags = convertTags(labels)
 		specRuns = append(specRuns, specRun)
 	}
 
