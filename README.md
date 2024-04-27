@@ -31,3 +31,17 @@ Welcome to the Fern Project, an innovative open-source solution designed to enha
    Replace `http://localhost:8080/` with your API server's URL and specify the project name in `f.Report`.
 
 2. **Run Your Tests**: After adding the client, run your Ginkgo tests normally.
+
+    How to execute the example tests  :
+    ```
+    cd tests
+    ginkgo ( ginkgo to be pre-installed )
+    ```
+
+    To add flags to test suits : The flag is added to file : 
+    tests/adder_suite_test.go
+  ```
+    Example : 
+    RunSpecs(t, "Adder Suite", Label("this-is-a-suite-level-label","anotherFlag"))
+  ```
+    The fern report will have the test report along with the labels.
