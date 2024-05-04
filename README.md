@@ -32,10 +32,9 @@ Welcome to the Fern Project, an innovative open-source solution designed to enha
 
 2. **Run Your Tests**: After adding the client, run your Ginkgo tests normally.
 
-    How to execute the example tests  :
+    How to execute the tests  :
     ```
-    cd tests
-    ginkgo ( ginkgo to be pre-installed )
+    make test
     ```
 
     To add flags to test suits : The flag is added to file : 
