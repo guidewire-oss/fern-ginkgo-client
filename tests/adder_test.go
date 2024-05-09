@@ -3,9 +3,9 @@ package tests_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-  fern "client/pkg/client"
+  fern "github.com/guidewire/fern-ginkgo-client/pkg/client"
 
-	. "client/tests"
+	. "github.com/guidewire/fern-ginkgo-client/tests"
 )
 
 var _ = Describe("Adder", func() {
