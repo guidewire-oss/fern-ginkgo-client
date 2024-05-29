@@ -45,6 +45,6 @@ Welcome to the Fern Project, an innovative open-source solution designed to enha
   ```
     The fern report will have the test report along with the labels.
 
-**See Also**
-fern-ui: `https://github.com/Guidewire/fern-ui`
-fern-reporter: `https://github.com/Guidewire/fern-reporter`
+### See Also
+1. [Fern UI](https://github.com/Guidewire/fern-ui)
+2. [Fern Ginkgo Reporter](https://github.com/Guidewire/fern-reporter)
