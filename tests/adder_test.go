@@ -3,8 +3,8 @@ package tests_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-  fern "github.com/guidewire/fern-ginkgo-client/pkg/client"
 
+  fern "github.com/guidewire/fern-ginkgo-client/pkg/client"
 	. "github.com/guidewire/fern-ginkgo-client/tests"
 )
 
@@ -22,6 +22,7 @@ var _ = Describe("Adder", func() {
 var _ = ReportAfterSuite("", func(report Report) {
     f := fern.New("Example Test",
         fern.WithBaseURL("http://localhost:8080/"),
+		fern.WithGeminiInsights(false),
     )
 
     err := f.Report("example test", report)

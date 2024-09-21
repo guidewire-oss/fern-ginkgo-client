@@ -16,6 +16,7 @@ type TestRun struct {
 	StartTime       time.Time  `json:"start_time"`
 	EndTime         time.Time  `json:"end_time"`
 	SuiteRuns       []SuiteRun `json:"suite_runs" gorm:"foreignKey:TestRunID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	EnableGeminiInsights bool       `json:"enable_gemini_insights"`
 }
 
 type SuiteRun struct {
