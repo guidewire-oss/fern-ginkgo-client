@@ -8,13 +8,13 @@ Welcome to the Fern Project, an innovative open-source solution designed to enha
 1. **Add the Fern dependency to your test project**:
 
    ```bash
-   go get -u github.com/guidewire/fern-ginkgo-client
+   go get -u github.com/guidewire-oss/fern-ginkgo-client
    ```
 2. **Add the Fern Client to your Ginkgo test suite**:
    
    Import the fern client package
    ```go
-   import fern "github.com/guidewire/fern-ginkgo-client/pkg/client"
+   import fern "github.com/guidewire-oss/fern-ginkgo-client/pkg/client"
    ```
 
    ```go
