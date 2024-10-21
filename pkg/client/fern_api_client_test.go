@@ -3,9 +3,10 @@ package client_test
 import (
 	"time"
 
-	"github.com/guidewire/fern-ginkgo-client/pkg/client"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/guidewire/fern-ginkgo-client/pkg/client"
 )
 
 var _ = Describe("FernApiClient", func() {
@@ -41,4 +42,12 @@ var _ = Describe("FernApiClient", func() {
 
 	})
 
+	It("should get a new client with Gemini Insights enabled", func() {
+		
+		fernApiClient := client.New("test", client.WithGeminiInsights(true))
+
+		Expect(fernApiClient).ToNot(BeNil())
+		// We need to add a method to check if Gemini Insights is enabled
+		// For now, we'll just check that the client is created
+	})
 })

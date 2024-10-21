@@ -6,17 +6,19 @@ import (
 )
 
 type FernApiClient struct {
-	name       string
-	httpClient *http.Client
-	baseURL    string
+	name              string
+	httpClient        *http.Client
+	baseURL           string
+	enableGeminiInsights bool
 }
 
 type ClientOption func(*FernApiClient)
 
 func New(testName string, options ...ClientOption) *FernApiClient {
 	f := &FernApiClient{
-		name:       testName,
-		httpClient: http.DefaultClient,
+		name:                 testName,
+		httpClient:           http.DefaultClient,
+		enableGeminiInsights: false, // Default to false
 	}
 
 	for _, o := range options {
@@ -41,5 +43,11 @@ func WithBaseURL(baseURL string) ClientOption {
 func WithTimeout(timeout time.Duration) ClientOption {
 	return func(ac *FernApiClient) {
 		ac.httpClient.Timeout = timeout
+	}
+}
+
+func WithGeminiInsights(enable bool) ClientOption {
+	return func(ac *FernApiClient) {
+		ac.enableGeminiInsights = enable
 	}
 }
