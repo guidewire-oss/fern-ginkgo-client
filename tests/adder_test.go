@@ -1,16 +1,16 @@
 package tests_test
 
 import (
+	fern "github.com/guidewire-oss/fern-ginkgo-client/pkg/client"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-  fern "github.com/guidewire/fern-ginkgo-client/pkg/client"
 
-	. "github.com/guidewire/fern-ginkgo-client/tests"
+	. "github.com/guidewire-oss/fern-ginkgo-client/tests"
 )
 
 var _ = Describe("Adder", func() {
 
-		Describe("Add", func() {
+	Describe("Add", func() {
 
 		It("adds two numbers", func() {
 			sum := Add(2, 3)
@@ -20,12 +20,11 @@ var _ = Describe("Adder", func() {
 
 })
 var _ = ReportAfterSuite("", func(report Report) {
-    f := fern.New("Example Test",
-        fern.WithBaseURL("http://localhost:8080/"),
-    )
+	f := fern.New("Example Test",
+		fern.WithBaseURL("http://localhost:8080/"),
+	)
 
-    err := f.Report("example test", report)
+	err := f.Report("example test", report)
 
-    Expect(err).To(BeNil(), "Unable to create reporter file")
+	Expect(err).To(BeNil(), "Unable to create reporter file")
 })
-
