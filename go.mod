@@ -1,4 +1,4 @@
-module github.com/guidewire/fern-ginkgo-client
+module github.com/guidewire-oss/fern-ginkgo-client
 
 go 1.21.3
 

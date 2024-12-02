@@ -7,10 +7,9 @@ import (
 	"net/http"
 	"net/url"
 	"time"
-
+	"github.com/guidewire-oss/fern-ginkgo-client/pkg/models"
 	gt "github.com/onsi/ginkgo/v2/types"
 
-	"github.com/guidewire/fern-ginkgo-client/pkg/models"
 )
 
 func (f *FernApiClient) Report(testName string, report gt.Report) error {

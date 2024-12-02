@@ -3,10 +3,9 @@ package client_test
 import (
 	"time"
 
+	"github.com/guidewire-oss/fern-ginkgo-client/pkg/client"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/guidewire/fern-ginkgo-client/pkg/client"
 )
 
 var _ = Describe("FernApiClient", func() {
