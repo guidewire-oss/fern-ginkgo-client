@@ -6,9 +6,14 @@ import (
 )
 
 type FernApiClient struct {
-	name       string
-	httpClient *http.Client
-	baseURL    string
+	name          string
+	httpClient    *http.Client
+	baseURL       string
+	username      string
+	branch        string
+	gitSHA        string
+	project       string
+	componentName string
 }
 
 type ClientOption func(*FernApiClient)
@@ -41,5 +46,35 @@ func WithBaseURL(baseURL string) ClientOption {
 func WithTimeout(timeout time.Duration) ClientOption {
 	return func(ac *FernApiClient) {
 		ac.httpClient.Timeout = timeout
+	}
+}
+
+func WithUsername(username string) ClientOption {
+	return func(ac *FernApiClient) {
+		ac.username = username
+	}
+}
+
+func WithBranch(branch string) ClientOption {
+	return func(ac *FernApiClient) {
+		ac.branch = branch
+	}
+}
+
+func WithGitSHA(sha string) ClientOption {
+	return func(ac *FernApiClient) {
+		ac.gitSHA = sha
+	}
+}
+
+func WithProject(project string) ClientOption {
+	return func(ac *FernApiClient) {
+		ac.project = project
+	}
+}
+
+func WithComponentName(component string) ClientOption {
+	return func(ac *FernApiClient) {
+		ac.componentName = component
 	}
 }

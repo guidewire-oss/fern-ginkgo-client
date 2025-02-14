@@ -16,6 +16,11 @@ type TestRun struct {
 	StartTime       time.Time  `json:"start_time"`
 	EndTime         time.Time  `json:"end_time"`
 	SuiteRuns       []SuiteRun `json:"suite_runs" gorm:"foreignKey:TestRunID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Username        string     `json:"username"`
+	Branch          string     `json:"branch"`
+	GitSHA          string     `json:"git_sha"`
+	Project         string     `json:"project"`
+	ComponentName   string     `json:"component_name"`
 }
 
 type SuiteRun struct {

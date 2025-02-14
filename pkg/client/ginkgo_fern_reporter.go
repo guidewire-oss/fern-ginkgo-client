@@ -48,6 +48,11 @@ func (f *FernApiClient) Report(testName string, report gt.Report) error {
 		StartTime:       report.StartTime,
 		EndTime:         time.Now(), // or report.EndTime if available
 		SuiteRuns:       suiteRuns,
+		Username:        f.username,
+		Branch:          f.branch,
+		GitSHA:          f.gitSHA,
+		Project:         f.project,
+		ComponentName:   f.componentName,
 	}
 
 	testJson, err := json.Marshal(testRun)
