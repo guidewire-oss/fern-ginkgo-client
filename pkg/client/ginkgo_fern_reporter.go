@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/guidewire-oss/fern-ginkgo-client/pkg/models"
@@ -34,6 +36,10 @@ func (f *FernApiClient) Report(testName string, report gt.Report) error {
 
 		// Accessing the suite labels
 		labels := report.SuiteLabels
+		// Add gitSHA to tags
+		if gitSha := getGitSha(); gitSha != "" {
+			labels = append(labels, getGitSha())
+		}
 		// logic to convert suite labels string to []Tag
 		specRun.Tags = convertTags(labels)
 		specRuns = append(specRuns, specRun)
@@ -86,4 +92,29 @@ func convertTags(specLabels []string) []models.Tag {
 		})
 	}
 	return tags
+}
+
+func getGitSha() string {
+	// Check for uncommitted changes
+	cmd := exec.Command("git", "diff", "--quiet")
+	err := cmd.Run()
+	if err != nil {
+		return "gitSHA:NA"
+	}
+
+	// Check for unpushed commits
+	cmd = exec.Command("git", "rev-list", "--count", "HEAD..origin/$(git rev-parse --abbrev-ref HEAD)")
+	unpushed, err := cmd.Output()
+	if err != nil || strings.TrimSpace(string(unpushed)) != "0" {
+		return "gitSHA:NA"
+	}
+
+	// get GIT SHA
+	cmd = exec.Command("git", "rev-parse", "HEAD")
+	sha, err := cmd.Output()
+	if err != nil {
+		fmt.Printf("client error: could not find the Git SHA of last commit")
+		return ""
+	}
+	return "gitSHA:" + strings.TrimSpace(string(sha))
 }
