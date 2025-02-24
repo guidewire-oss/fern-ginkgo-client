@@ -1,0 +1,27 @@
+name: Unit test
+run-name: Unit test
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  unit-tests:
+    name: 'Unit Tests'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v3
+
+      - name: 'Setup Go'
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.2'
+
+      - name: 'Install Ginkgo'
+        run: |
+          go install github.com/onsi/ginkgo/v2/ginkgo@v2.22.1
+
+      - name: 'Build and Test'
+        run: make mod-tidy unit-test

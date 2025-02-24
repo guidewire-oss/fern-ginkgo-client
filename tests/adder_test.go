@@ -4,6 +4,7 @@ import (
 	fern "github.com/guidewire-oss/fern-ginkgo-client/pkg/client"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"os"
 
 	. "github.com/guidewire-oss/fern-ginkgo-client/tests"
 )
@@ -20,11 +21,13 @@ var _ = Describe("Adder", func() {
 
 })
 var _ = ReportAfterSuite("", func(report Report) {
-	f := fern.New("Example Test",
-		fern.WithBaseURL("http://localhost:8080/"),
-	)
+	if os.Getenv("GITHUB_ACTION") == "" { //skip reporting in GH workflow
+		f := fern.New("Example Test",
+			fern.WithBaseURL("http://localhost:8080/"),
+		)
 
-	err := f.Report("example test", report)
+		err := f.Report("example test", report)
 
-	Expect(err).To(BeNil(), "Unable to create reporter file")
+		Expect(err).To(BeNil(), "Unable to create reporter file")
+	}
 })

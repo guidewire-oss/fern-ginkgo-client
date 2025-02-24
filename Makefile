@@ -8,14 +8,14 @@ GOBASE=$(shell pwd)
 GOBIN=$(GOBASE)/bin
 GOPKG=$(GOBASE)
 
-# Testing
+mod-tidy:
+	@echo "🧹 Running go mod tidy..."
+	@go mod tidy
 
 unit-test:
 	@echo "🧪 Running Unit Tests..."
-#	@go test $(TEST_FLAGS) -coverprofile=profile.cov ./...
 	ginkgo -r -p --label-filter=unit --randomize-all
 
 test:
 	@echo "🧪 Running All Tests with labels \"$(LABEL_FILTER)\"..."
-#	@go test $(TEST_FLAGS) -coverprofile=profile.cov ./...
 	ginkgo -r -p --label-filter="$(LABEL_FILTER)" --randomize-all
