@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/go-git/go-git/v5"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 
 	"github.com/guidewire-oss/fern-ginkgo-client/pkg/models"
@@ -50,6 +52,8 @@ func (f *FernApiClient) Report(testName string, report gt.Report) error {
 		SuiteRuns:       suiteRuns,
 	}
 
+	addMetadataInfo(&testRun)
+
 	testJson, err := json.Marshal(testRun)
 	if err != nil {
 		panic(err)
@@ -75,6 +79,51 @@ func (f *FernApiClient) Report(testName string, report gt.Report) error {
 	}
 
 	return nil
+}
+
+func addMetadataInfo(testRun *models.TestRun) {
+	if os.Getenv("GITHUB_ACTION") != "" {
+		testRun.GitBranch = os.Getenv("GITHUB_REF_NAME")
+		testRun.GitSha = os.Getenv("GITHUB_SHA")
+		testRun.BuildTriggerActor = os.Getenv("GITHUB_TRIGGERING_ACTOR")
+		testRun.BuildUrl = fmt.Sprintf("%s/%s/actions/runs/%s", os.Getenv("GITHUB_SERVER_URL"), os.Getenv("GITHUB_REPOSITORY"), os.Getenv("GITHUB_RUN_ID"))
+	} else {
+		repoPath := os.Getenv("GIT_REPO_PATH")
+		if repoPath == "" {
+			repoPath = "."
+		}
+		branch, commitSHA, _ := GetBranchAndCommit(repoPath)
+		testRun.GitBranch = branch
+		testRun.GitSha = commitSHA
+	}
+}
+
+func GetBranchAndCommit(repoPath string) (branch string, commitSHA string, err error) {
+	// Open the repository from the provided path.
+	repo, err := git.PlainOpen(repoPath)
+	if err != nil {
+		return "NA", "NA", fmt.Errorf("failed to open repository: %w", err)
+	}
+
+	// Retrieve the HEAD reference.
+	ref, err := repo.Head()
+	if err != nil {
+		return "NA", "NA", fmt.Errorf("failed to get HEAD reference: %w", err)
+	}
+
+	// Get the commit object corresponding to the HEAD reference.
+	commit, err := repo.CommitObject(ref.Hash())
+	if err != nil {
+		return "NA", "NA", fmt.Errorf("failed to get commit object: %w", err)
+	}
+
+	// Extract the short name of the branch from the reference.
+	branch = ref.Name().Short()
+
+	// Convert the commit hash to a string.
+	commitSHA = commit.Hash.String()
+
+	return branch, commitSHA, nil
 }
 
 func convertTags(specLabels []string) []models.Tag {
