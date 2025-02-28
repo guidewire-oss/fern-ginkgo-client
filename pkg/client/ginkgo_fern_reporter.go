@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-git/go-git/v5"
+	"github.com/guidewire-oss/fern-ginkgo-client/pkg/utils"
+	"github.com/onsi/gomega"
 	"net/http"
 	"net/url"
 	"os"
@@ -15,7 +17,7 @@ import (
 	gt "github.com/onsi/ginkgo/v2/types"
 )
 
-func (f *FernApiClient) Report(testName string, report gt.Report) error {
+func (f *FernApiClient) Report(report gt.Report) error {
 
 	var suiteRuns []models.SuiteRun
 	suiteRun := models.SuiteRun{
@@ -99,7 +101,13 @@ func addMetadataInfo(testRun *models.TestRun) {
 }
 
 func GetBranchAndCommit(repoPath string) (branch string, commitSHA string, err error) {
-	// Open the repository from the provided path.
+	// Open the repository from the provided path - if not set to the root, go up the tree.
+	repoPath, err = utils.FindGitRoot(repoPath)
+	if err != nil {
+		gitRootError := fmt.Errorf("⚠️ Warning: No Git repository found (%v)", err)
+		fmt.Printf("%v\n", gitRootError)
+		return "NA", "NA", gitRootError
+	}
 	repo, err := git.PlainOpen(repoPath)
 	if err != nil {
 		return "NA", "NA", fmt.Errorf("failed to open repository: %w", err)
@@ -135,4 +143,14 @@ func convertTags(specLabels []string) []models.Tag {
 		})
 	}
 	return tags
+}
+
+func ReportTestResult(projectName string, report gt.Report) {
+	fernReporterBaseUrl := "http://localhost:8080/"
+	if os.Getenv("FERN_REPORTER_BASE_URL") != "" {
+		fernReporterBaseUrl = os.Getenv("FERN_REPORTER_BASE_URL")
+	}
+	fernClient := New(projectName, WithBaseURL(fernReporterBaseUrl))
+	err := fernClient.Report(report)
+	gomega.Expect(err).To(gomega.BeNil(), "Unable to push report to Fern")
 }

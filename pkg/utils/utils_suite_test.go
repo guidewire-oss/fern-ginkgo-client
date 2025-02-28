@@ -1,4 +1,4 @@
-package client_test
+package utils_test
 
 import (
 	"github.com/guidewire-oss/fern-ginkgo-client/pkg"
@@ -10,9 +10,9 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestClient(t *testing.T) {
+func TestUtils(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Client Suite")
+	RunSpecs(t, "Utils Suite")
 }
 
 var _ = ReportAfterSuite("", func(report Report) {
