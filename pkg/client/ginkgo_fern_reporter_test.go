@@ -9,6 +9,34 @@ import (
 
 var _ = Describe("GinkGo Fern Reporter", Ordered, Label("unit"), func() {
 	var testrun models.TestRun
+	var originalEnv map[string]string
+
+	BeforeEach(func() {
+		testrun = models.TestRun{}
+
+		// Save the original values to restore later
+		originalEnv = map[string]string{
+			"GITHUB_ACTION":           os.Getenv("GITHUB_ACTION"),
+			"GIT_REPO_PATH":           os.Getenv("GIT_REPO_PATH"),
+			"GITHUB_REF_NAME":         os.Getenv("GITHUB_REF_NAME"),
+			"GITHUB_SHA":              os.Getenv("GITHUB_SHA"),
+			"GITHUB_TRIGGERING_ACTOR": os.Getenv("GITHUB_TRIGGERING_ACTOR"),
+			"GITHUB_SERVER_URL":       os.Getenv("GITHUB_SERVER_URL"),
+			"GITHUB_REPOSITORY":       os.Getenv("GITHUB_REPOSITORY"),
+			"GITHUB_RUN_ID":           os.Getenv("GITHUB_RUN_ID"),
+		}
+	})
+
+	AfterEach(func() {
+		// Restore original environment variables
+		for key, val := range originalEnv {
+			if val == "" {
+				_ = os.Unsetenv(key) // Remove if it was originally unset
+			} else {
+				_ = os.Setenv(key, val) // Restore original value
+			}
+		}
+	})
 
 	It("should get local git details", func() {
 		_ = os.Setenv("GITHUB_ACTION", "")
@@ -45,9 +73,5 @@ var _ = Describe("GinkGo Fern Reporter", Ordered, Label("unit"), func() {
 		Expect(testrun.GitSha).To(Equal("acfb8356f058b88cef60a0b035df375f6471d6a0"))
 		Expect(testrun.BuildTriggerActor).To(Equal("user"))
 		Expect(testrun.BuildUrl).To(Equal("https://github.com/guidewire-oss/repo/actions/runs/13381986677"))
-	})
-
-	BeforeEach(func() {
-		testrun = models.TestRun{}
 	})
 })
