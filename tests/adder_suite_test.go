@@ -17,6 +17,7 @@ func TestAdder(t *testing.T) {
 
 var _ = ReportAfterSuite("", func(report Report) {
 	if os.Getenv("GITHUB_ACTION") == "" { //skip reporting in GH workflow
-		fern.ReportTestResult(pkg.ProjectName, report)
+		fernApiClient := fern.New("test")
+		fernApiClient.ReportTestResult(pkg.ProjectName, report)
 	}
 })

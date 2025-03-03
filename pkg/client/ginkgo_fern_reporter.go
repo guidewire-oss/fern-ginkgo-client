@@ -145,7 +145,7 @@ func convertTags(specLabels []string) []models.Tag {
 	return tags
 }
 
-func ReportTestResult(projectName string, report gt.Report) {
+func (f *FernApiClient) ReportTestResult(projectName string, report gt.Report) {
 	fernReporterBaseUrl := "http://localhost:8080/"
 	if os.Getenv("FERN_REPORTER_BASE_URL") != "" {
 		fernReporterBaseUrl = os.Getenv("FERN_REPORTER_BASE_URL")
