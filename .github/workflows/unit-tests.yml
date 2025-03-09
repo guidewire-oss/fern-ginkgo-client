@@ -4,7 +4,10 @@ run-name: Unit test
 on:
   push:
     branches:
-      - '**'
+      - '**'    
+  pull_request:
+    branches:
+      - main
 
 jobs:
   unit-tests:
