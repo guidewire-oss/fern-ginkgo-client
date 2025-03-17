@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/go-git/go-git/v5"
 	"github.com/guidewire-oss/fern-ginkgo-client/pkg/utils"
-	"github.com/onsi/gomega"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -47,11 +47,11 @@ func (f *FernApiClient) Report(report gt.Report) error {
 	suiteRuns = append(suiteRuns, suiteRun)
 
 	testRun := models.TestRun{
-		TestProjectName: f.name, // Set this to your project name
-		TestSeed:        uint64(report.SuiteConfig.RandomSeed),
-		StartTime:       report.StartTime,
-		EndTime:         time.Now(), // or report.EndTime if available
-		SuiteRuns:       suiteRuns,
+		TestProjectID: f.id, // Set this to your project id
+		TestSeed:      uint64(report.SuiteConfig.RandomSeed),
+		StartTime:     report.StartTime,
+		EndTime:       time.Now(), // or report.EndTime if available
+		SuiteRuns:     suiteRuns,
 	}
 
 	addMetadataInfo(&testRun)
@@ -74,10 +74,21 @@ func (f *FernApiClient) Report(report gt.Report) error {
 	}
 
 	req.Header.Add("Content-Type", "application/json")
-	_, err = f.httpClient.Do(req)
+	resp, err := f.httpClient.Do(req)
 	if err != nil {
 		fmt.Printf("client: error making http request: %s\n", err)
 		return err
+	}
+	defer resp.Body.Close()
+
+	// Read the response body
+	body, readErr := io.ReadAll(resp.Body)
+	if readErr != nil {
+		return fmt.Errorf("client: error reading response body: %w", readErr)
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("client: Response status code: %d, Response: %s", resp.StatusCode, string(body))
 	}
 
 	return nil
@@ -143,14 +154,4 @@ func convertTags(specLabels []string) []models.Tag {
 		})
 	}
 	return tags
-}
-
-func (f *FernApiClient) ReportTestResult(projectName string, report gt.Report) {
-	fernReporterBaseUrl := "http://localhost:8080/"
-	if os.Getenv("FERN_REPORTER_BASE_URL") != "" {
-		fernReporterBaseUrl = os.Getenv("FERN_REPORTER_BASE_URL")
-	}
-	fernClient := New(projectName, WithBaseURL(fernReporterBaseUrl))
-	err := fernClient.Report(report)
-	gomega.Expect(err).To(gomega.BeNil(), "Unable to push report to Fern")
 }

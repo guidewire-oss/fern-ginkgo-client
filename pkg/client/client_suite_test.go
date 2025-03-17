@@ -1,9 +1,7 @@
 package client_test
 
 import (
-	"github.com/guidewire-oss/fern-ginkgo-client/pkg"
-	fern "github.com/guidewire-oss/fern-ginkgo-client/pkg/client"
-	"os"
+	"github.com/guidewire-oss/fern-ginkgo-client/tests"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -16,8 +14,5 @@ func TestClient(t *testing.T) {
 }
 
 var _ = ReportAfterSuite("", func(report Report) {
-	if os.Getenv("GITHUB_ACTION") == "" { //skip reporting in GH workflow
-		fernApiClient := fern.New("test")
-		fernApiClient.ReportTestResult(pkg.ProjectName, report)
-	}
+	tests.ReportTest(report)
 })

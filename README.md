@@ -10,48 +10,53 @@ Welcome to the Fern Project, an innovative open-source solution designed to enha
    ```bash
    go get -u github.com/guidewire-oss/fern-ginkgo-client
    ```
-2. **Add the Fern Client to your Ginkgo test suite**:
+2. **Generate Project ID by sending the below payload to `fern-reporter` (hosted in your environment)** 
+```bash
+curl -L -X POST http://localhost:8080/api/project \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "First Projects",
+    "team_name": "my team",
+    "comment": "This is the test project"
+  }' 
+```
+Sample Response:
+```json
+{
+  "uuid": "996ad860-2a9a-504f-8861-aeafd0b2ae29",
+  "name": "First Projects",
+  "team_name": "my team",
+  "comment": "This is the test project"
+}
+```
+3. **Add the Fern Client to your Ginkgo test suite**:
    
    In the example below, from this project, the constant pkg.ProjectName is set to the name of this project:
    ```go
-   const ProjectName = "Fern Ginkgo Client"
+   const PROJECT_ID = "996ad860-2a9a-504f-8861-aeafd0b2ae29"
    ```
    Import the fern client package into the Ginkgo test suite file:
    ```go
    import fern "github.com/guidewire-oss/fern-ginkgo-client/pkg/client"
    ```
-   Add ReportAfterSuite to call the Fern ReportTestResult.
+   Add ReportAfterSuite to call the Fern ReportTestResult.    Initialize the fernClient by passing the Project ID and ClientOption. Invoke the `Report` function by passing the report Object.
+
    ```go
    var _ = ReportAfterSuite("", func(report Report) {
-      fern.ReportTestResult(pkg.ProjectName, report)
+      fernReporterBaseUrl := "http://localhost:8080/"
+       if os.Getenv("FERN_REPORTER_BASE_URL") != "" {
+           fernReporterBaseUrl = os.Getenv("FERN_REPORTER_BASE_URL")
+       }
+       fernApiClient := fern.New(pkg.PROJECT_ID, fern.WithBaseURL(fernReporterBaseUrl))
+       fernApiClient.Report(report)
    })
-   ```
-   ReportTestResult takes two parameters, the name of the project and the report. It uses an environment variable
-   `FERN_REPORTER_BASE_URL` to determine the location of the Fern Reporter service. If it is not set, then it will 
-   default to `http://localhost:8080/`.
 
+   ```
 3. **Run Your Tests**: After adding the client, run your Ginkgo tests normally.
 
-   How to execute the tests  :
+   ```bash
+   ginkgo -r -p --label-filter=unit --randomize-all
    ```
-   make test
-   ```
-
-   To add flags to test suites, add a label to the test suite file. For an example, look in 
-   [tests/adder_suite_test.go](tests/adder_suite_test.go)
-   ```go
-   func TestAdder(t *testing.T) {
-       RegisterFailHandler(Fail)
-       RunSpecs(t, "Adder Suite", Label("this-is-a-suite-level-label"))
-   }
-   
-   var _ = ReportAfterSuite("", func(report Report) {
-       fern.ReportTestResult(pkg.ProjectName, report)
-   })
-   ```
-   The fern report will have three test reports with the name `Fern Ginkgo Client`, three suite runs, and a spec run for 
-   each test. If there is a label on the suite, then that gets stored and associated with each spec run that was within
-   the suite. 
 
 ### See Also
 1. [Fern UI](https://github.com/Guidewire/fern-ui)
