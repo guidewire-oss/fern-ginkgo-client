@@ -4,15 +4,19 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/go-git/go-git/v5"
+	"github.com/guidewire-oss/fern-ginkgo-client/pkg/utils"
+	"github.com/onsi/gomega"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 	"github.com/guidewire-oss/fern-ginkgo-client/pkg/models"
 	gt "github.com/onsi/ginkgo/v2/types"
 
 )
 
-func (f *FernApiClient) Report(testName string, report gt.Report) error {
+func (f *FernApiClient) Report(report gt.Report) error {
 
 	var suiteRuns []models.SuiteRun
 	suiteRun := models.SuiteRun{
@@ -50,6 +54,8 @@ func (f *FernApiClient) Report(testName string, report gt.Report) error {
 		EnableGeminiInsights: f.enableGeminiInsights,
 	}
 
+	addMetadataInfo(&testRun)
+
 	testJson, err := json.Marshal(testRun)
 	if err != nil {
 		panic(err)
@@ -77,6 +83,57 @@ func (f *FernApiClient) Report(testName string, report gt.Report) error {
 	return nil
 }
 
+func addMetadataInfo(testRun *models.TestRun) {
+	if os.Getenv("GITHUB_ACTION") != "" {
+		testRun.GitBranch = os.Getenv("GITHUB_REF_NAME")
+		testRun.GitSha = os.Getenv("GITHUB_SHA")
+		testRun.BuildTriggerActor = os.Getenv("GITHUB_TRIGGERING_ACTOR")
+		testRun.BuildUrl = fmt.Sprintf("%s/%s/actions/runs/%s", os.Getenv("GITHUB_SERVER_URL"), os.Getenv("GITHUB_REPOSITORY"), os.Getenv("GITHUB_RUN_ID"))
+	} else {
+		repoPath := os.Getenv("GIT_REPO_PATH")
+		if repoPath == "" {
+			repoPath = "."
+		}
+		branch, commitSHA, _ := GetBranchAndCommit(repoPath)
+		testRun.GitBranch = branch
+		testRun.GitSha = commitSHA
+	}
+}
+
+func GetBranchAndCommit(repoPath string) (branch string, commitSHA string, err error) {
+	// Open the repository from the provided path - if not set to the root, go up the tree.
+	repoPath, err = utils.FindGitRoot(repoPath)
+	if err != nil {
+		gitRootError := fmt.Errorf("⚠️ Warning: No Git repository found (%v)", err)
+		fmt.Printf("%v\n", gitRootError)
+		return "NA", "NA", gitRootError
+	}
+	repo, err := git.PlainOpen(repoPath)
+	if err != nil {
+		return "NA", "NA", fmt.Errorf("failed to open repository: %w", err)
+	}
+
+	// Retrieve the HEAD reference.
+	ref, err := repo.Head()
+	if err != nil {
+		return "NA", "NA", fmt.Errorf("failed to get HEAD reference: %w", err)
+	}
+
+	// Get the commit object corresponding to the HEAD reference.
+	commit, err := repo.CommitObject(ref.Hash())
+	if err != nil {
+		return "NA", "NA", fmt.Errorf("failed to get commit object: %w", err)
+	}
+
+	// Extract the short name of the branch from the reference.
+	branch = ref.Name().Short()
+
+	// Convert the commit hash to a string.
+	commitSHA = commit.Hash.String()
+
+	return branch, commitSHA, nil
+}
+
 func convertTags(specLabels []string) []models.Tag {
 	// Convert Ginkgo tags to Tag struct
 	var tags []models.Tag
@@ -86,4 +143,14 @@ func convertTags(specLabels []string) []models.Tag {
 		})
 	}
 	return tags
+}
+
+func (f *FernApiClient) ReportTestResult(projectName string, report gt.Report) {
+	fernReporterBaseUrl := "http://localhost:8080/"
+	if os.Getenv("FERN_REPORTER_BASE_URL") != "" {
+		fernReporterBaseUrl = os.Getenv("FERN_REPORTER_BASE_URL")
+	}
+	fernClient := New(projectName, WithBaseURL(fernReporterBaseUrl))
+	err := fernClient.Report(report)
+	gomega.Expect(err).To(gomega.BeNil(), "Unable to push report to Fern")
 }

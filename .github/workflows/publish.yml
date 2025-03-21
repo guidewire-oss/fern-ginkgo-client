@@ -1,0 +1,28 @@
+name: Publish and Release
+run-name: Publish and Release
+
+on:
+  push:
+    tags:
+      - "v*"
+jobs:
+  release-and-publish:
+    name: 'Publish and Release'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v3
+
+      - name: 'Setup Go'
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.2'
+
+      - name: 'Install GoReleaser'
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --verbose --clean --timeout 60m
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_ACCESS_TOKEN }}

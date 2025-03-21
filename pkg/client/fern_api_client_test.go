@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("FernApiClient", func() {
+var _ = Describe("FernApiClient", Label("unit"), func() {
 	It("should get a new client", func() {
 
 		fernApiClient := client.New("test")

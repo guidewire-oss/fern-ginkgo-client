@@ -1,4 +1,4 @@
-package tests_test
+package utils_test
 
 import (
 	"github.com/guidewire-oss/fern-ginkgo-client/pkg"
@@ -10,9 +10,9 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestAdder(t *testing.T) {
+func TestUtils(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Adder Suite", Label("this-is-a-suite-level-label"))
+	RunSpecs(t, "Utils Suite")
 }
 
 var _ = ReportAfterSuite("", func(report Report) {

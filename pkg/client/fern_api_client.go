@@ -14,7 +14,7 @@ type FernApiClient struct {
 
 type ClientOption func(*FernApiClient)
 
-func New(testName string, options ...ClientOption) *FernApiClient {
+func New(projectName string, options ...ClientOption) *FernApiClient {
 	f := &FernApiClient{
 		name:                 testName,
 		httpClient:           http.DefaultClient,
