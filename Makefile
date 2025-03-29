@@ -19,3 +19,11 @@ unit-test:
 test:
 	@echo "🧪 Running All Tests with labels \"$(LABEL_FILTER)\"..."
 	ginkgo -r -p --label-filter="$(LABEL_FILTER)" --randomize-all
+
+fmt:
+	@echo "📝 Formatting Go code..."
+	@go fmt ./...
+
+lint: 
+	@echo "🔍 Running linter..."
+	@golangci-lint run ./...
