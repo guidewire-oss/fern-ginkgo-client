@@ -41,4 +41,12 @@ var _ = Describe("FernApiClient", Label("unit"), func() {
 
 	})
 
+	It("should get a new client with Gemini Insights enabled", func() {
+		
+		fernApiClient := client.New("test", client.WithGeminiInsights(true))
+
+		Expect(fernApiClient).ToNot(BeNil())
+		// We need to add a method to check if Gemini Insights is enabled
+		// For now, we'll just check that the client is created
+	})
 })

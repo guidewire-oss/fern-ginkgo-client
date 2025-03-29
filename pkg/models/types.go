@@ -20,6 +20,7 @@ type TestRun struct {
 	BuildTriggerActor string     `json:"build_trigger_actor"`
 	BuildUrl          string     `json:"build_url"`
 	SuiteRuns         []SuiteRun `json:"suite_runs" gorm:"foreignKey:TestRunID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+  EnableGeminiInsights bool    `json:"enable_gemini_insights"`
 }
 
 type SuiteRun struct {

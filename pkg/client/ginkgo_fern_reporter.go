@@ -11,10 +11,9 @@ import (
 	"net/url"
 	"os"
 	"time"
-
 	"github.com/guidewire-oss/fern-ginkgo-client/pkg/models"
-
 	gt "github.com/onsi/ginkgo/v2/types"
+
 )
 
 func (f *FernApiClient) Report(report gt.Report) error {
@@ -47,11 +46,12 @@ func (f *FernApiClient) Report(report gt.Report) error {
 	suiteRuns = append(suiteRuns, suiteRun)
 
 	testRun := models.TestRun{
-		TestProjectName: f.name, // Set this to your project name
-		TestSeed:        uint64(report.SuiteConfig.RandomSeed),
-		StartTime:       report.StartTime,
-		EndTime:         time.Now(), // or report.EndTime if available
-		SuiteRuns:       suiteRuns,
+		TestProjectName:      f.name, // Set this to your project name
+		TestSeed:             uint64(report.SuiteConfig.RandomSeed),
+		StartTime:            report.StartTime,
+		EndTime:              time.Now(), // or report.EndTime if available
+		SuiteRuns:            suiteRuns,
+		EnableGeminiInsights: f.enableGeminiInsights,
 	}
 
 	addMetadataInfo(&testRun)
