@@ -6,16 +6,16 @@ import (
 )
 
 type FernApiClient struct {
-	name       string
+	id         string
 	httpClient *http.Client
 	baseURL    string
 }
 
 type ClientOption func(*FernApiClient)
 
-func New(projectName string, options ...ClientOption) *FernApiClient {
+func New(projectId string, options ...ClientOption) *FernApiClient {
 	f := &FernApiClient{
-		name:       projectName,
+		id:         projectId,
 		httpClient: http.DefaultClient,
 	}
 
