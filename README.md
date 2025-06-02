@@ -58,7 +58,7 @@ Sample Response:
    ginkgo -r -p --label-filter=unit --randomize-all
    ```
 
-4. ## GRPC_EXECUTE (Environment Variable)
+4. **GRPC_EXECUTE (Environment Variable)**:
 
 The `GRPC_EXECUTE` environment variable controls whether real GRPC integration tests are executed.
 By default, GRPC tests are skipped to avoid requiring a live GRPC server in standard test runs (e.g., CI pipelines). Setting this variable to `TRUE` enables execution of those tests.
