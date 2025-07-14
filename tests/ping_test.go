@@ -3,12 +3,12 @@ package tests_test
 import (
 	"context"
 	"os"
-	"time"
 
 	pb "github.com/guidewire-oss/fern-ginkgo-client/reporter" // Import generated protobuf package
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func init() {
@@ -22,14 +22,16 @@ func init() {
 
 			BeforeEach(func() {
 				var err error
-				conn, err = grpc.Dial("127.0.0.1:50051", grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(5*time.Second))
+				conn, err = grpc.NewClient("127.0.0.1:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 				Expect(err).NotTo(HaveOccurred())
 
 				client = pb.NewPingServiceClient(conn)
 			})
 
 			AfterEach(func() {
-				conn.Close()
+				if conn != nil {
+					_ = conn.Close()
+				}
 			})
 
 			It("should send a real ping and get a response", func() {

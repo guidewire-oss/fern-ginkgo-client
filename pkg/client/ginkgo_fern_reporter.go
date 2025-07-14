@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/go-git/go-git/v5"
-	"github.com/guidewire-oss/fern-ginkgo-client/pkg/utils"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"time"
+
+	"github.com/go-git/go-git/v5"
+	"github.com/guidewire-oss/fern-ginkgo-client/pkg/utils"
 
 	"github.com/guidewire-oss/fern-ginkgo-client/pkg/models"
 
@@ -79,7 +80,9 @@ func (f *FernApiClient) Report(report gt.Report) error {
 		fmt.Printf("client: error making http request: %s\n", err)
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	// Read the response body
 	body, readErr := io.ReadAll(resp.Body)
