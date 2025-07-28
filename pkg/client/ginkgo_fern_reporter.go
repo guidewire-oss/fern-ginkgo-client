@@ -24,6 +24,7 @@ func (f *FernApiClient) Report(report gt.Report) error {
 		SuiteName: report.SuiteDescription,
 		StartTime: report.StartTime,
 		EndTime:   report.EndTime,
+		Tags:      convertTags(report.SuiteLabels),
 	}
 
 	var specRuns []models.SpecRun
@@ -34,12 +35,8 @@ func (f *FernApiClient) Report(report gt.Report) error {
 			Message:         spec.Failure.Message,
 			StartTime:       spec.StartTime,
 			EndTime:         spec.EndTime,
+			Tags:            convertTags(spec.Labels()),
 		}
-
-		// Accessing the suite labels
-		labels := report.SuiteLabels
-		// logic to convert suite labels string to []Tag
-		specRun.Tags = convertTags(labels)
 		specRuns = append(specRuns, specRun)
 	}
 
