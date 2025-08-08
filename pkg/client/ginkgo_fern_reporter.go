@@ -37,7 +37,12 @@ func (f *FernApiClient) Report(report gt.Report) error {
 			EndTime:         spec.EndTime,
 			Tags:            convertTags(spec.Labels()),
 		}
-		specRuns = append(specRuns, specRun)
+		if spec.LeafNodeType != gt.NodeTypeIt {
+			// It's a setup/teardown node
+			fmt.Printf("Current node %s is not an It node. Skipping \n", spec.LeafNodeType)
+		} else {
+			specRuns = append(specRuns, specRun)
+		}
 	}
 
 	suiteRun.SpecRuns = specRuns
