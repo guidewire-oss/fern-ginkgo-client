@@ -4,13 +4,8 @@ run:
 
 linters:
   enable:
-    - gofmt            
     - govet
     - staticcheck
     - ineffassign
     - errcheck
-    - unused
-
-linters-settings:
-  gofmt:
-    simplify: true      
+    - unused      
