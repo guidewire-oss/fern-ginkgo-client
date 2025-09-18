@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/go-git/go-git/v5"
-	"github.com/guidewire-oss/fern-ginkgo-client/pkg/utils"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"time"
+
+	"github.com/go-git/go-git/v5"
+	"github.com/guidewire-oss/fern-ginkgo-client/pkg/utils"
 
 	"github.com/guidewire-oss/fern-ginkgo-client/pkg/models"
 
@@ -65,17 +66,27 @@ func (f *FernApiClient) Report(report gt.Report) error {
 
 	bodyReader := bytes.NewReader(testJson)
 
-	url, err := url.JoinPath(f.baseURL, "api/testrun")
+	var reportUrl string
+	if f.token != "" {
+		reportUrl, err = url.JoinPath(f.baseURL, "api/v1/test-runs")
+	} else {
+		reportUrl, err = url.JoinPath(f.baseURL, "api/testrun")
+	}
 	if err != nil {
 		return err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, url, bodyReader)
+	req, err := http.NewRequest(http.MethodPost, reportUrl, bodyReader)
 	if err != nil {
 		return err
 	}
 
 	req.Header.Add("Content-Type", "application/json")
+
+	// Add authorization token if available
+	if f.token != "" {
+		req.Header.Set("Authorization", "Bearer "+f.token)
+	}
 	resp, err := f.httpClient.Do(req)
 	if err != nil {
 		fmt.Printf("client: error making http request: %s\n", err)

@@ -57,7 +57,13 @@ Sample Response:
    ```bash
    ginkgo -r -p --label-filter=unit --randomize-all
    ```
-
+4. **Authentication**: when using the Fern Platform (which has authentication enabled), set the following environment variables:
+   ```shell
+    export CLIENT_ID=<Your Service Application Client ID>
+    export CLIENT_SECRET=<Your Service Application Client Secret>
+    export AUTH_URL=<Base URL of your authentication server>
+    export FERN_GINKGO_CLIENT_SCOPE=<Fern Platform scope for Testrun write>
+   ```
 ### See Also
 1. [Fern UI](https://github.com/Guidewire/fern-ui)
 2. [Fern Ginkgo Reporter](https://github.com/Guidewire/fern-reporter)
