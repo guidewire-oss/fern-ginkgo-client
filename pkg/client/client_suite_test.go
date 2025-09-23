@@ -1,8 +1,9 @@
 package client_test
 
 import (
-	"github.com/guidewire-oss/fern-ginkgo-client/tests"
 	"testing"
+
+	"github.com/guidewire-oss/fern-ginkgo-client/tests"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
