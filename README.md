@@ -59,8 +59,8 @@ Sample Response:
    ```
 4. **Authentication**: when using the Fern Platform (which has authentication enabled), set the following environment variables:
    ```shell
-    export CLIENT_ID=<Your Service Application Client ID>
-    export CLIENT_SECRET=<Your Service Application Client Secret>
+    export FERN_AUTH_CLIENT_ID=<Your Service Application Client ID>
+    export FERN_AUTH_CLIENT_SECRET=<Your Service Application Client Secret>
     export AUTH_URL=<Base URL of your authentication server>
     export FERN_GINKGO_CLIENT_SCOPE=<Fern Platform scope for Testrun write>
    ```
