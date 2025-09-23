@@ -4,7 +4,6 @@ import (
 	_ "encoding/json"
 	"errors"
 	"io"
-	"io/ioutil"
 	"net/http"
 	_ "net/http/httptest"
 	"os"
@@ -77,7 +76,7 @@ var _ = Describe("FernApiClient", func() {
 					Expect(req.URL.String()).To(Equal("http://auth/token"))
 					return &http.Response{
 						StatusCode: 200,
-						Body:       ioutil.NopCloser(strings.NewReader(tokenJSON)),
+						Body:       io.NopCloser(strings.NewReader(tokenJSON)),
 					}, nil
 				},
 			}
@@ -124,7 +123,7 @@ var _ = Describe("FernApiClient", func() {
 				roundTripFunc: func(req *http.Request) (*http.Response, error) {
 					return &http.Response{
 						StatusCode: 200,
-						Body:       ioutil.NopCloser(strings.NewReader("not-json")),
+						Body:       io.NopCloser(strings.NewReader("not-json")),
 					}, nil
 				},
 			}
