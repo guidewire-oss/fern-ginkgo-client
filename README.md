@@ -64,6 +64,17 @@ Sample Response:
     export AUTH_URL=<Base URL of your authentication server>
     export FERN_GINKGO_CLIENT_SCOPE=<Fern Platform scope for Testrun write>
    ```
+5. **Test Level Tags**: if you want to set Test Run level tags, you can do this using an environment variable
+TEST_RUN_TAGS which can be set to one or more values, separated by commas. For example:
+    ```shell
+    export TEST_RUN_TAGS="Tag1,Tag2"
+    ```
+6. **Environment**: if you want to set the Environment, which is stored in the Test Run in Fern, you can do this using
+an environment variable TEST_ENVIRONMENT. For example:
+    ```shell
+    export TEST_ENVIRONMENT="local"
+    ```
+
 ### See Also
 1. [Fern UI](https://github.com/Guidewire/fern-ui)
 2. [Fern Ginkgo Reporter](https://github.com/Guidewire/fern-reporter)

@@ -20,6 +20,8 @@ type TestRun struct {
 	GitSha            string     `json:"git_sha"`
 	BuildTriggerActor string     `json:"build_trigger_actor"`
 	BuildUrl          string     `json:"build_url"`
+	Tags              []Tag      `json:"tags"`
+	Environment       string     `json:"environment"`
 	SuiteRuns         []SuiteRun `json:"suite_runs"`
 }
 

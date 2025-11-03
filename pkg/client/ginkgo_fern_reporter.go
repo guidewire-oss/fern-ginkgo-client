@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/go-git/go-git/v5"
@@ -17,6 +18,23 @@ import (
 
 	gt "github.com/onsi/ginkgo/v2/types"
 )
+
+func getRunLevelTags() []models.Tag {
+	envTags := os.Getenv("TEST_RUN_TAGS")
+	if envTags == "" {
+		return nil
+	}
+
+	parts := strings.Split(envTags, ",")
+	tags := make([]models.Tag, 0, len(parts))
+	for _, p := range parts {
+		name := strings.TrimSpace(p)
+		if name != "" {
+			tags = append(tags, models.Tag{Name: name})
+		}
+	}
+	return tags
+}
 
 func (f *FernApiClient) Report(report gt.Report) error {
 
@@ -54,6 +72,8 @@ func (f *FernApiClient) Report(report gt.Report) error {
 		TestSeed:      uint64(report.SuiteConfig.RandomSeed),
 		StartTime:     report.StartTime,
 		EndTime:       time.Now(), // or report.EndTime if available
+		Tags:          getRunLevelTags(),
+		Environment:   os.Getenv("TEST_ENVIRONMENT"),
 		SuiteRuns:     suiteRuns,
 	}
 
