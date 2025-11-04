@@ -7,10 +7,10 @@ import (
 	fern "github.com/guidewire-oss/fern-ginkgo-client/pkg/client"
 	"github.com/onsi/gomega"
 
-	. "github.com/onsi/ginkgo/v2"
+	"github.com/onsi/ginkgo/v2"
 )
 
-func ReportTest(report Report) {
+func ReportTest(report ginkgo.Report) {
 	fernReporterBaseUrl := "http://localhost:8080/"
 	fernProjectId := pkg.PROJECT_ID
 

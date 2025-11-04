@@ -16,9 +16,11 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-          cache: false
+          cache: true
+      - name: Run go mod tidy
+        run: go mod tidy
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
           version: v1.61.0
-          args: --config=.golangci.yml
+          args: --no-config --enable=govet,staticcheck,ineffassign,errcheck,unused --timeout=5m

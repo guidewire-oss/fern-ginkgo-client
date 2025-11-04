@@ -75,6 +75,23 @@ an environment variable TEST_ENVIRONMENT. For example:
     export TEST_ENVIRONMENT="local"
     ```
 
+4. **GRPC_EXECUTE (Environment Variable)**:
+
+The `GRPC_EXECUTE` environment variable controls whether real GRPC integration tests are executed.
+By default, GRPC tests are skipped to avoid requiring a live GRPC server in standard test runs (e.g., CI pipelines). Setting this variable to `TRUE` enables execution of those tests.
+
+To run the GRPC tests:
+
+```bash
+export GRPC_EXECUTE=TRUE
+go test ./... # or ginkgo ./...
+If GRPC_EXECUTE is not set to TRUE, the GRPC-related tests will be skipped at runtime.
+
+Notes
+Make sure the GRPC server is running and accessible at 127.0.0.1:50051 before enabling this.
+This is useful for local development or in controlled integration environments
+
+
 ### See Also
 1. [Fern UI](https://github.com/Guidewire/fern-ui)
 2. [Fern Ginkgo Reporter](https://github.com/Guidewire/fern-reporter)

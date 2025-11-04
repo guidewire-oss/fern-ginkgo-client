@@ -112,7 +112,9 @@ func (f *FernApiClient) Report(report gt.Report) error {
 		fmt.Printf("client: error making http request: %s\n", err)
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	// Read the response body
 	body, readErr := io.ReadAll(resp.Body)
