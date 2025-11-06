@@ -43,11 +43,11 @@ Sample Response:
 
    ```go
    var _ = ReportAfterSuite("", func(report Report) {
-      fernReporterBaseUrl := "http://localhost:8080/"
-       if os.Getenv("FERN_REPORTER_BASE_URL") != "" {
-           fernReporterBaseUrl = os.Getenv("FERN_REPORTER_BASE_URL")
+      fernBaseUrl := "http://localhost:8080/"
+       if os.Getenv("FERN_BASE_URL") != "" {
+           fernBaseUrl = os.Getenv("FERN_BASE_URL")
        }
-       fernApiClient := fern.New(pkg.PROJECT_ID, fern.WithBaseURL(fernReporterBaseUrl))
+       fernApiClient := fern.New(pkg.PROJECT_ID, fern.WithBaseURL(fernBaseUrl))
        fernApiClient.Report(report)
    })
 
@@ -62,7 +62,7 @@ Sample Response:
     export FERN_AUTH_CLIENT_ID=<Your Service Application Client ID>
     export FERN_AUTH_CLIENT_SECRET=<Your Service Application Client Secret>
     export AUTH_URL=<Base URL of your authentication server>
-    export FERN_GINKGO_CLIENT_SCOPE=<Fern Platform scope for Testrun write>
+    export FERN_GINKGO_CLIENT_SCOPE=<Fern Platform scope for Testrun write, eg: fern.testrun.write or fern.write>
    ```
 ### See Also
 1. [Fern UI](https://github.com/Guidewire/fern-ui)

@@ -11,12 +11,12 @@ import (
 )
 
 func ReportTest(report Report) {
-	fernReporterBaseUrl := "http://localhost:8080/"
+	fernBaseUrl := "http://localhost:8080/"
 	fernProjectId := pkg.PROJECT_ID
 
-	// If FERN_REPORTER_BASE_URL is set, use it
-	if os.Getenv("FERN_REPORTER_BASE_URL") != "" {
-		fernReporterBaseUrl = os.Getenv("FERN_REPORTER_BASE_URL")
+	// If FERN_BASE_URL is set, use it
+	if os.Getenv("FERN_BASE_URL") != "" {
+		fernBaseUrl = os.Getenv("FERN_BASE_URL")
 	}
 
 	if os.Getenv("PROJECT_ID") != "" {
@@ -24,7 +24,7 @@ func ReportTest(report Report) {
 	}
 
 	if os.Getenv("GITHUB_ACTION") == "" { //skip reporting in GH workflow
-		fernApiClient, err := fern.New(fernProjectId, fern.WithBaseURL(fernReporterBaseUrl))
+		fernApiClient, err := fern.New(fernProjectId, fern.WithBaseURL(fernBaseUrl))
 		gomega.Expect(err).To(gomega.BeNil(), "Unable to create Fern API client %v", err)
 		err = fernApiClient.Report(report)
 		gomega.Expect(err).To(gomega.BeNil(), "Unable to push report to Fern %v", err)
