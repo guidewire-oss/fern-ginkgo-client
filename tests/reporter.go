@@ -3,8 +3,8 @@ package tests
 import (
 	"os"
 
-	"github.com/guidewire-oss/fern-ginkgo-client/pkg"
-	fern "github.com/guidewire-oss/fern-ginkgo-client/pkg/client"
+	"github.com/guidewire-oss/fern-ginkgo-client/v2/pkg"
+	fern "github.com/guidewire-oss/fern-ginkgo-client/v2/pkg/client"
 	"github.com/onsi/gomega"
 
 	. "github.com/onsi/ginkgo/v2"

@@ -8,7 +8,7 @@ Welcome to the Fern Project, an innovative open-source solution designed to enha
 1. **Add the Fern dependency to your test project**:
 
    ```bash
-   go get -u github.com/guidewire-oss/fern-ginkgo-client
+   go get -u github.com/guidewire-oss/fern-ginkgo-client/v2
    ```
 2. **Generate Project ID by sending the below payload to `fern-reporter` (hosted in your environment)** 
 ```bash
@@ -37,7 +37,7 @@ Sample Response:
    ```
    Import the fern client package into the Ginkgo test suite file:
    ```go
-   import fern "github.com/guidewire-oss/fern-ginkgo-client/pkg/client"
+   import fern "github.com/guidewire-oss/fern-ginkgo-client/v2/pkg/client"
    ```
    Add ReportAfterSuite to call the Fern ReportTestResult.    Initialize the fernClient by passing the Project ID and ClientOption. Invoke the `Report` function by passing the report Object.
 
