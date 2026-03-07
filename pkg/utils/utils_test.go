@@ -2,7 +2,7 @@ package utils_test
 
 import (
 	"fmt"
-	"github.com/guidewire-oss/fern-ginkgo-client/pkg/utils"
+	"github.com/guidewire-oss/fern-ginkgo-client/v2/pkg/utils"
 	"os"
 	"path/filepath"
 	"strings"

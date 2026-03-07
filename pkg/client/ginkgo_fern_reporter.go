@@ -12,9 +12,9 @@ import (
 	"time"
 
 	"github.com/go-git/go-git/v5"
-	"github.com/guidewire-oss/fern-ginkgo-client/pkg/utils"
+	"github.com/guidewire-oss/fern-ginkgo-client/v2/pkg/utils"
 
-	"github.com/guidewire-oss/fern-ginkgo-client/pkg/models"
+	"github.com/guidewire-oss/fern-ginkgo-client/v2/pkg/models"
 
 	gt "github.com/onsi/ginkgo/v2/types"
 )

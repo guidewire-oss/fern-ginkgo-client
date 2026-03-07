@@ -3,7 +3,7 @@ package client
 import (
 	"os"
 
-	"github.com/guidewire-oss/fern-ginkgo-client/pkg/models"
+	"github.com/guidewire-oss/fern-ginkgo-client/v2/pkg/models"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
