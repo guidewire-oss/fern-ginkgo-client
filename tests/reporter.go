@@ -1,11 +1,11 @@
 package tests
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/guidewire-oss/fern-ginkgo-client/v2/pkg"
 	fern "github.com/guidewire-oss/fern-ginkgo-client/v2/pkg/client"
-	"github.com/onsi/gomega"
 
 	. "github.com/onsi/ginkgo/v2"
 )
@@ -25,8 +25,13 @@ func ReportTest(report Report) {
 
 	if os.Getenv("GITHUB_ACTION") == "" { //skip reporting in GH workflow
 		fernApiClient, err := fern.New(fernProjectId, fern.WithBaseURL(fernBaseUrl))
-		gomega.Expect(err).To(gomega.BeNil(), "Unable to create Fern API client %v", err)
+		if err != nil {
+			fmt.Printf("⚠️  Fern reporting failed: unable to create Fern API client: %v\n", err)
+			return
+		}
 		err = fernApiClient.Report(report)
-		gomega.Expect(err).To(gomega.BeNil(), "Unable to push report to Fern %v", err)
+		if err != nil {
+			fmt.Printf("⚠️  Fern reporting failed: unable to push report to Fern: %v\n", err)
+		}
 	}
 }
