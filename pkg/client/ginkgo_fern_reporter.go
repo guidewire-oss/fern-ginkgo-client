@@ -19,6 +19,9 @@ import (
 	gt "github.com/onsi/ginkgo/v2/types"
 )
 
+// marshalJSON is a seam over json.Marshal so tests can simulate marshal failures.
+var marshalJSON = json.Marshal
+
 func getRunLevelTags() []models.Tag {
 	envTags := os.Getenv("TEST_RUN_TAGS")
 	if envTags == "" {
@@ -79,9 +82,9 @@ func (f *FernApiClient) Report(report gt.Report) error {
 
 	addMetadataInfo(&testRun)
 
-	testJson, err := json.Marshal(testRun)
+	testJson, err := marshalJSON(testRun)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("client: failed to marshal test run: %w", err)
 	}
 
 	bodyReader := bytes.NewReader(testJson)

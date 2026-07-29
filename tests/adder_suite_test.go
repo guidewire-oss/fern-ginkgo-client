@@ -14,6 +14,10 @@ func TestAdder(t *testing.T) {
 	RunSpecs(t, "Adder Suite", Label("this-is-a-suite-level-label"))
 }
 
-var _ = ReportAfterSuite("", func(report Report) {
+var _ = ReportAfterSuite("Fern reporting (direct client)", func(report Report) {
 	tests.ReportTest(report)
+})
+
+var _ = ReportAfterSuite("Fern reporting (safe client)", func(report Report) {
+	tests.ReportTestSafe(report)
 })

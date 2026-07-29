@@ -1,10 +1,12 @@
 package client
 
 import (
+	"errors"
 	"os"
 
 	"github.com/guidewire-oss/fern-ginkgo-client/v2/pkg/models"
 	. "github.com/onsi/ginkgo/v2"
+	gt "github.com/onsi/ginkgo/v2/types"
 	. "github.com/onsi/gomega"
 )
 
@@ -93,5 +95,26 @@ var _ = Describe("Ginkgo Fern Reporter", Ordered, Label("unit"), func() {
 
 		Expect(testRun.Tags).To(HaveLen(2))
 		Expect(testRun.Environment).To(Equal("staging"))
+	})
+
+	Describe("Report", func() {
+		It("returns an error instead of panicking when JSON marshaling fails", func() {
+			original := marshalJSON
+			marshalJSON = func(v any) ([]byte, error) {
+				return nil, errors.New("boom")
+			}
+			DeferCleanup(func() { marshalJSON = original })
+
+			c, err := New("proj-marshal-fail")
+			Expect(err).To(BeNil())
+
+			var reportErr error
+			Expect(func() {
+				reportErr = c.Report(gt.Report{})
+			}).NotTo(Panic())
+
+			Expect(reportErr).To(HaveOccurred())
+			Expect(reportErr.Error()).To(ContainSubstring("marshal"))
+		})
 	})
 })

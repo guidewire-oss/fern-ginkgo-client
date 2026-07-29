@@ -39,19 +39,20 @@ Sample Response:
    ```go
    import fern "github.com/guidewire-oss/fern-ginkgo-client/v2/pkg/client"
    ```
-   Add ReportAfterSuite to call the Fern ReportTestResult.    Initialize the fernClient by passing the Project ID and ClientOption. Invoke the `Report` function by passing the report Object.
+   Add ReportAfterSuite to call `fern.ReportAfterSuiteSafe`, passing the Project ID, the report object, and any `ClientOption`s. Reporting to Fern is a side effect of running your tests — `ReportAfterSuiteSafe` logs a warning and returns normally if client creation or the report push fails, so a Fern outage never fails or hangs your test suite.
 
    ```go
-   var _ = ReportAfterSuite("", func(report Report) {
+   var _ = ReportAfterSuite("Fern reporting", func(report Report) {
       fernBaseUrl := "http://localhost:8080/"
        if os.Getenv("FERN_BASE_URL") != "" {
            fernBaseUrl = os.Getenv("FERN_BASE_URL")
        }
-       fernApiClient := fern.New(pkg.PROJECT_ID, fern.WithBaseURL(fernBaseUrl))
-       fernApiClient.Report(report)
+       fern.ReportAfterSuiteSafe(pkg.PROJECT_ID, report, fern.WithBaseURL(fernBaseUrl))
    })
 
    ```
+
+   If you need direct control over error handling instead, use `fern.New(...)` and `fernApiClient.Report(report)` directly — both return an `error` you can handle as you see fit.
 3. **Run Your Tests**: After adding the client, run your Ginkgo tests normally.
 
    ```bash

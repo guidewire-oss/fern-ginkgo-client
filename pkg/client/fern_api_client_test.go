@@ -52,6 +52,18 @@ var _ = Describe("FernApiClient", func() {
 			Expect(c.GetToken()).To(Equal(""))
 		})
 
+		It("sets a default HTTP timeout when none is provided", func() {
+			c, err := New("proj-timeout-default")
+			Expect(err).To(BeNil())
+			Expect(c.GetHTTPClient().Timeout).To(Equal(defaultHTTPTimeout))
+		})
+
+		It("does not mutate the shared http.DefaultClient", func() {
+			_, err := New("proj-timeout-shared")
+			Expect(err).To(BeNil())
+			Expect(http.DefaultClient.Timeout).To(Equal(time.Duration(0)))
+		})
+
 		It("returns error when token generation fails", func() {
 			rt := &mockRoundTripper{
 				roundTripFunc: func(req *http.Request) (*http.Response, error) {

@@ -11,6 +11,11 @@ import (
 	"time"
 )
 
+// defaultHTTPTimeout bounds how long a Report() call can block on a stalled
+// connection to Fern. Without it, a network stall never returns an error and
+// the reporting suite hangs indefinitely instead of failing fast.
+const defaultHTTPTimeout = 30 * time.Second
+
 type FernApiClient struct {
 	id           string
 	httpClient   *http.Client
@@ -33,7 +38,7 @@ type TokenResponse struct {
 func New(projectId string, options ...ClientOption) (*FernApiClient, error) {
 	f := &FernApiClient{
 		id:           projectId,
-		httpClient:   http.DefaultClient,
+		httpClient:   &http.Client{Timeout: defaultHTTPTimeout},
 		clientID:     os.Getenv("FERN_AUTH_CLIENT_ID"),
 		clientSecret: os.Getenv("FERN_AUTH_CLIENT_SECRET"),
 		authURL:      os.Getenv("AUTH_URL"),
