@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"os"
@@ -89,13 +90,60 @@ var _ = Describe("ReportAfterSuiteSafe", func() {
 		}).NotTo(Panic())
 	})
 
-	It("does not hang when the caller's http.Client has no timeout and the connection stalls", func() {
+	It("cancels the in-flight request via context when the deadline fires, rather than only abandoning the wait", func() {
 		origTimeout := safeReportTimeout
 		safeReportTimeout = 50 * time.Millisecond
 		DeferCleanup(func() {
 			safeReportTimeout = origTimeout
 		})
 
+		// A well-behaved RoundTripper aborts as soon as its request's
+		// context is done. Blocking on that (instead of on an
+		// independent channel) proves ReportAfterSuiteSafe's deadline
+		// actually cancels the request rather than merely giving up on
+		// waiting for it.
+		roundTripErr := make(chan error, 1)
+		rt := &mockRoundTripper{
+			roundTripFunc: func(req *http.Request) (*http.Response, error) {
+				<-req.Context().Done()
+				err := req.Context().Err()
+				roundTripErr <- err
+				return nil, err
+			},
+		}
+
+		start := time.Now()
+		Expect(func() {
+			ReportAfterSuiteSafe("proj-safe-cancel", gt.Report{},
+				WithHTTPClient(&http.Client{Transport: rt}), // Timeout left at zero (no timeout)
+				WithBaseURL("http://fern.invalid"),
+			)
+		}).NotTo(Panic())
+		elapsed := time.Since(start)
+
+		// It must have genuinely waited out the deadline...
+		Expect(elapsed).To(BeNumerically(">=", 50*time.Millisecond))
+		// ...but not much longer than it, proving the wait was bounded.
+		Expect(elapsed).To(BeNumerically("<", 2*time.Second))
+
+		// And the request's context must have actually been canceled by
+		// the deadline, not left running in the background.
+		var rtErr error
+		Eventually(roundTripErr, time.Second).Should(Receive(&rtErr))
+		Expect(rtErr).To(MatchError(context.DeadlineExceeded))
+	})
+
+	It("does not hang when a stalled connection ignores context cancellation", func() {
+		origTimeout := safeReportTimeout
+		safeReportTimeout = 50 * time.Millisecond
+		DeferCleanup(func() {
+			safeReportTimeout = origTimeout
+		})
+
+		// Some RoundTrippers (or the transports they wrap) don't honor
+		// context cancellation. ReportAfterSuiteSafe must still return
+		// promptly on the deadline even though the background goroutine
+		// is left to leak until blockUntil is eventually closed below.
 		blockUntil := make(chan struct{})
 		DeferCleanup(func() { close(blockUntil) })
 
@@ -113,9 +161,12 @@ var _ = Describe("ReportAfterSuiteSafe", func() {
 				WithBaseURL("http://fern.invalid"),
 			)
 		}).NotTo(Panic())
+		elapsed := time.Since(start)
 
-		// The stalled round-trip never returns on its own; the only way this
-		// completes quickly is the safeReportTimeout deadline firing.
-		Expect(time.Since(start)).To(BeNumerically("<", 2*time.Second))
+		// The stalled round-trip never returns on its own; the only way
+		// this completes at all is the safeReportTimeout deadline firing,
+		// and it must not fire early.
+		Expect(elapsed).To(BeNumerically(">=", 50*time.Millisecond))
+		Expect(elapsed).To(BeNumerically("<", 2*time.Second))
 	})
 })

@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -40,6 +41,14 @@ func getRunLevelTags() []models.Tag {
 }
 
 func (f *FernApiClient) Report(report gt.Report) error {
+	return f.reportWithContext(context.Background(), report)
+}
+
+// reportWithContext is the context-aware core of Report. It exists so
+// callers that need to bound the whole reporting operation (see
+// ReportAfterSuiteSafe) can cancel the in-flight HTTP request on a
+// deadline, rather than merely abandoning the wait for it.
+func (f *FernApiClient) reportWithContext(ctx context.Context, report gt.Report) error {
 
 	var suiteRuns []models.SuiteRun
 	suiteRun := models.SuiteRun{
@@ -99,7 +108,7 @@ func (f *FernApiClient) Report(report gt.Report) error {
 		return err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, reportUrl, bodyReader)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, reportUrl, bodyReader)
 	if err != nil {
 		return err
 	}

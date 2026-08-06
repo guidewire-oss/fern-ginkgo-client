@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -36,6 +37,14 @@ type TokenResponse struct {
 }
 
 func New(projectId string, options ...ClientOption) (*FernApiClient, error) {
+	return newWithContext(context.Background(), projectId, options...)
+}
+
+// newWithContext is the context-aware core of New. It exists so callers that
+// need to bound the whole client-creation-plus-token-fetch operation (see
+// ReportAfterSuiteSafe) can cancel the in-flight HTTP request on a deadline,
+// rather than merely abandoning the wait for it.
+func newWithContext(ctx context.Context, projectId string, options ...ClientOption) (*FernApiClient, error) {
 	f := &FernApiClient{
 		id:           projectId,
 		httpClient:   &http.Client{Timeout: defaultHTTPTimeout},
@@ -51,7 +60,7 @@ func New(projectId string, options ...ClientOption) (*FernApiClient, error) {
 
 	// Generate token if credentials are available
 	if f.clientID != "" && f.clientSecret != "" && f.authURL != "" {
-		if err := f.generateToken(); err != nil {
+		if err := f.generateToken(ctx); err != nil {
 			return f, fmt.Errorf("failed to generate token: %w", err)
 		}
 	}
@@ -59,7 +68,7 @@ func New(projectId string, options ...ClientOption) (*FernApiClient, error) {
 	return f, nil
 }
 
-func (f *FernApiClient) generateToken() error {
+func (f *FernApiClient) generateToken(ctx context.Context) error {
 	tokenURL := strings.TrimRight(f.authURL, "/") + "/token"
 
 	// Prepare the request body for client credentials flow
@@ -69,7 +78,7 @@ func (f *FernApiClient) generateToken() error {
 	data.Set("client_secret", f.clientSecret)
 	data.Set("scope", f.scope)
 
-	req, err := http.NewRequest("POST", tokenURL, bytes.NewBufferString(data.Encode()))
+	req, err := http.NewRequestWithContext(ctx, "POST", tokenURL, bytes.NewBufferString(data.Encode()))
 	if err != nil {
 		return fmt.Errorf("failed to create token request: %w", err)
 	}
@@ -106,7 +115,7 @@ func (f *FernApiClient) RefreshToken() error {
 	if f.clientID == "" || f.clientSecret == "" || f.authURL == "" {
 		return fmt.Errorf("missing credentials for token refresh")
 	}
-	return f.generateToken()
+	return f.generateToken(context.Background())
 }
 
 func WithHTTPClient(httpClient *http.Client) ClientOption {
