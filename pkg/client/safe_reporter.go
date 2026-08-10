@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/onsi/ginkgo/v2"
@@ -29,28 +30,46 @@ func ReportAfterSuiteSafe(projectID string, report gt.Report, opts ...ClientOpti
 
 	done := make(chan struct{})
 
+	// The worker goroutine and the select below can both decide a timeout
+	// occurred (the worker sees ctx.Err() != nil after its request is
+	// canceled; the select sees ctx.Done() fire) at nearly the same instant,
+	// and `select` breaks that tie arbitrarily when both channels are ready.
+	// warnOnce makes the outcome deterministic either way: exactly one
+	// warning is emitted, never zero and never two.
+	var warnOnce sync.Once
+	warn := func(format string, args ...any) {
+		warnOnce.Do(func() {
+			fmt.Fprintf(ginkgo.GinkgoWriter, format, args...)
+		})
+	}
+	timeoutMsg := fmt.Sprintf("⚠️  Fern reporting failed: timed out after %s\n", safeReportTimeout)
+
 	go func() {
 		defer close(done)
 		defer func() {
 			if r := recover(); r != nil {
-				fmt.Fprintf(ginkgo.GinkgoWriter, "⚠️  Fern reporting failed: recovered from panic: %v\n", r)
+				warn("⚠️  Fern reporting failed: recovered from panic: %v\n", r)
 			}
 		}()
 
 		c, err := newWithContext(ctx, projectID, opts...)
 		if err != nil {
-			// Once the deadline has fired, the caller already saw the
-			// "timed out" message below; don't print a second, confusing
-			// message for the same underlying cancellation.
-			if ctx.Err() == nil {
-				fmt.Fprintf(ginkgo.GinkgoWriter, "⚠️  Fern reporting failed: unable to create Fern API client: %v\n", err)
+			if ctx.Err() != nil {
+				// The deadline had already elapsed by the time this
+				// concluded; report it as a timeout, not a generic
+				// creation failure.
+				warn("%s", timeoutMsg)
+			} else {
+				warn("⚠️  Fern reporting failed: unable to create Fern API client: %v\n", err)
 			}
 			return
 		}
 
 		if err := c.reportWithContext(ctx, report); err != nil {
-			if ctx.Err() == nil {
-				fmt.Fprintf(ginkgo.GinkgoWriter, "⚠️  Fern reporting failed: unable to push report to Fern: %v\n", err)
+			if ctx.Err() != nil {
+				warn("%s", timeoutMsg)
+			} else {
+				warn("⚠️  Fern reporting failed: unable to push report to Fern: %v\n", err)
 			}
 		}
 	}()
@@ -58,6 +77,6 @@ func ReportAfterSuiteSafe(projectID string, report gt.Report, opts ...ClientOpti
 	select {
 	case <-done:
 	case <-ctx.Done():
-		fmt.Fprintf(ginkgo.GinkgoWriter, "⚠️  Fern reporting failed: timed out after %s\n", safeReportTimeout)
+		warn("%s", timeoutMsg)
 	}
 }

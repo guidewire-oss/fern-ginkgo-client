@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	gt "github.com/onsi/ginkgo/v2/types"
@@ -131,6 +132,42 @@ var _ = Describe("ReportAfterSuiteSafe", func() {
 		var rtErr error
 		Eventually(roundTripErr, time.Second).Should(Receive(&rtErr))
 		Expect(rtErr).To(MatchError(context.DeadlineExceeded))
+	})
+
+	It("emits exactly one warning when the worker finishes at the same instant the deadline fires", func() {
+		origTimeout := safeReportTimeout
+		safeReportTimeout = time.Millisecond
+		DeferCleanup(func() {
+			safeReportTimeout = origTimeout
+		})
+
+		// The worker goroutine (which decides "timeout" from ctx.Err())
+		// and the outer select (which decides "timeout" from ctx.Done())
+		// both race to declare the outcome. Run this enough times, with a
+		// RoundTripper that returns the instant its context is canceled,
+		// to exercise both orderings of that race.
+		for i := range 200 {
+			buf := &strings.Builder{}
+			GinkgoWriter.TeeTo(buf)
+
+			rt := &mockRoundTripper{
+				roundTripFunc: func(req *http.Request) (*http.Response, error) {
+					<-req.Context().Done()
+					return nil, req.Context().Err()
+				},
+			}
+
+			ReportAfterSuiteSafe("proj-safe-race", gt.Report{},
+				WithHTTPClient(&http.Client{Transport: rt}),
+				WithBaseURL("http://fern.invalid"),
+			)
+
+			GinkgoWriter.ClearTeeWriters()
+
+			warnings := strings.Count(buf.String(), "Fern reporting failed")
+			Expect(warnings).To(Equal(1), "iteration %d: expected exactly one warning, got %d in: %s", i, warnings, buf.String())
+			Expect(buf.String()).To(ContainSubstring("timed out"), "iteration %d", i)
+		}
 	})
 
 	It("does not hang when a stalled connection ignores context cancellation", func() {
