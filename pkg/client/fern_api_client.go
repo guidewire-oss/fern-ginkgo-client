@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -10,6 +11,11 @@ import (
 	"strings"
 	"time"
 )
+
+// defaultHTTPTimeout bounds how long a Report() call can block on a stalled
+// connection to Fern. Without it, a network stall never returns an error and
+// the reporting suite hangs indefinitely instead of failing fast.
+const defaultHTTPTimeout = 30 * time.Second
 
 type FernApiClient struct {
 	id           string
@@ -31,9 +37,17 @@ type TokenResponse struct {
 }
 
 func New(projectId string, options ...ClientOption) (*FernApiClient, error) {
+	return newWithContext(context.Background(), projectId, options...)
+}
+
+// newWithContext is the context-aware core of New. It exists so callers that
+// need to bound the whole client-creation-plus-token-fetch operation (see
+// ReportAfterSuiteSafe) can cancel the in-flight HTTP request on a deadline,
+// rather than merely abandoning the wait for it.
+func newWithContext(ctx context.Context, projectId string, options ...ClientOption) (*FernApiClient, error) {
 	f := &FernApiClient{
 		id:           projectId,
-		httpClient:   http.DefaultClient,
+		httpClient:   &http.Client{Timeout: defaultHTTPTimeout},
 		clientID:     os.Getenv("FERN_AUTH_CLIENT_ID"),
 		clientSecret: os.Getenv("FERN_AUTH_CLIENT_SECRET"),
 		authURL:      os.Getenv("AUTH_URL"),
@@ -46,7 +60,7 @@ func New(projectId string, options ...ClientOption) (*FernApiClient, error) {
 
 	// Generate token if credentials are available
 	if f.clientID != "" && f.clientSecret != "" && f.authURL != "" {
-		if err := f.generateToken(); err != nil {
+		if err := f.generateToken(ctx); err != nil {
 			return f, fmt.Errorf("failed to generate token: %w", err)
 		}
 	}
@@ -54,7 +68,7 @@ func New(projectId string, options ...ClientOption) (*FernApiClient, error) {
 	return f, nil
 }
 
-func (f *FernApiClient) generateToken() error {
+func (f *FernApiClient) generateToken(ctx context.Context) error {
 	tokenURL := strings.TrimRight(f.authURL, "/") + "/token"
 
 	// Prepare the request body for client credentials flow
@@ -64,7 +78,7 @@ func (f *FernApiClient) generateToken() error {
 	data.Set("client_secret", f.clientSecret)
 	data.Set("scope", f.scope)
 
-	req, err := http.NewRequest("POST", tokenURL, bytes.NewBufferString(data.Encode()))
+	req, err := http.NewRequestWithContext(ctx, "POST", tokenURL, bytes.NewBufferString(data.Encode()))
 	if err != nil {
 		return fmt.Errorf("failed to create token request: %w", err)
 	}
@@ -101,7 +115,7 @@ func (f *FernApiClient) RefreshToken() error {
 	if f.clientID == "" || f.clientSecret == "" || f.authURL == "" {
 		return fmt.Errorf("missing credentials for token refresh")
 	}
-	return f.generateToken()
+	return f.generateToken(context.Background())
 }
 
 func WithHTTPClient(httpClient *http.Client) ClientOption {

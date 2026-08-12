@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -18,6 +19,9 @@ import (
 
 	gt "github.com/onsi/ginkgo/v2/types"
 )
+
+// marshalJSON is a seam over json.Marshal so tests can simulate marshal failures.
+var marshalJSON = json.Marshal
 
 func getRunLevelTags() []models.Tag {
 	envTags := os.Getenv("TEST_RUN_TAGS")
@@ -37,6 +41,14 @@ func getRunLevelTags() []models.Tag {
 }
 
 func (f *FernApiClient) Report(report gt.Report) error {
+	return f.reportWithContext(context.Background(), report)
+}
+
+// reportWithContext is the context-aware core of Report. It exists so
+// callers that need to bound the whole reporting operation (see
+// ReportAfterSuiteSafe) can cancel the in-flight HTTP request on a
+// deadline, rather than merely abandoning the wait for it.
+func (f *FernApiClient) reportWithContext(ctx context.Context, report gt.Report) error {
 
 	var suiteRuns []models.SuiteRun
 	suiteRun := models.SuiteRun{
@@ -79,9 +91,9 @@ func (f *FernApiClient) Report(report gt.Report) error {
 
 	addMetadataInfo(&testRun)
 
-	testJson, err := json.Marshal(testRun)
+	testJson, err := marshalJSON(testRun)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("client: failed to marshal test run: %w", err)
 	}
 
 	bodyReader := bytes.NewReader(testJson)
@@ -96,7 +108,7 @@ func (f *FernApiClient) Report(report gt.Report) error {
 		return err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, reportUrl, bodyReader)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, reportUrl, bodyReader)
 	if err != nil {
 		return err
 	}

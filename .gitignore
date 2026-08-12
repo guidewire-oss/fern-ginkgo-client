@@ -22,3 +22,6 @@ go.work
 .idea/
 
 .git-authors
+
+# Session scratch state (not permanent project docs)
+claude-progress.md
