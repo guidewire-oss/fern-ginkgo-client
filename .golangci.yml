@@ -1,16 +1,21 @@
+version: "2"
 run:
-  timeout: 5m                 
+  timeout: 5m
   modules-download-mode: readonly
-
 linters:
+  settings:
+    staticcheck:
+      # v2 defaults plus ST1001: dot imports are idiomatic for Ginkgo/Gomega.
+      checks: ["all", "-ST1000", "-ST1001", "-ST1003", "-ST1016", "-ST1020", "-ST1021", "-ST1022"]
+  exclusions:
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+formatters:
   enable:
-    - gofmt            
-    - govet
-    - staticcheck
-    - ineffassign
-    - errcheck
-    - unused
-
-linters-settings:
-  gofmt:
-    simplify: true      
+    - gofmt
+  settings:
+    gofmt:
+      simplify: true
