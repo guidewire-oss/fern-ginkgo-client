@@ -1,16 +1,34 @@
+version: "2"
 run:
-  timeout: 5m                 
   modules-download-mode: readonly
-
 linters:
+  settings:
+    staticcheck:
+      # golangci-lint v2 folded stylecheck into staticcheck; dot-importing
+      # Ginkgo/Gomega is the standard Ginkgo idiom, so allow it (ST1001).
+      dot-import-whitelist:
+        - github.com/onsi/ginkgo/v2
+        - github.com/onsi/gomega
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
   enable:
-    - gofmt            
-    - govet
-    - staticcheck
-    - ineffassign
-    - errcheck
-    - unused
-
-linters-settings:
-  gofmt:
-    simplify: true      
+    - gofmt
+  settings:
+    gofmt:
+      simplify: true
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

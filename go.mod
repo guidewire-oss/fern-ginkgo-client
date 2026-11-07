@@ -1,6 +1,8 @@
 module github.com/guidewire-oss/fern-ginkgo-client/v2
 
-go 1.24.0
+go 1.26.0
+
+toolchain go1.27.3
 
 require (
 	github.com/go-git/go-git/v5 v5.17.0
