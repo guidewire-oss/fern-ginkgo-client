@@ -25,3 +25,4 @@ go.work
 
 # Session scratch state (not permanent project docs)
 claude-progress.md
+.DS_Store
