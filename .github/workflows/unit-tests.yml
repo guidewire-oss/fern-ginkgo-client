@@ -11,16 +11,23 @@ on:
 
 jobs:
   unit-tests:
-    name: 'Unit Tests'
+    name: 'Unit Tests (Go ${{ matrix.go-version }})'
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The two Go releases that still get security fixes, each on its latest patch.
+        go-version: [oldstable, stable]
+    # setup-go v6+ exports GOTOOLCHAIN=local, so the toolchain line in go.mod
+    # does not switch the oldstable leg to a newer Go.
     steps:
       - name: 'Checkout'
         uses: actions/checkout@v3
 
       - name: 'Setup Go'
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v7
         with:
-          go-version: '1.24.0'
+          go-version: ${{ matrix.go-version }}
 
       - name: 'Install Ginkgo'
         run: |
